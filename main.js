@@ -11,11 +11,22 @@ function bindEventListeners() {
 }
 
 async function turnOnCamera() {
-  const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-  $localVideo.srcObject = stream;
-  $localVideo.play();
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+    $localVideo.srcObject = stream;
+    $localVideo.play();
 
-  $turnCameraOffButton.addEventListener("click", turnOffCamera(stream));
+    $turnCameraOffButton.addEventListener("click", turnOffCamera(stream));
+  } catch (error) {
+    if (
+      error.name === "NotAllowedError" ||
+      error.name === "PermissionDeniedError"
+    ) {
+      alert("Permission denied error");
+    } else {
+      alert("error");
+    }
+  }
 }
 
 function turnOffCamera(stream) {

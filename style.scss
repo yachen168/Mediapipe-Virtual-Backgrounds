@@ -1,3 +1,20 @@
+header {
+  margin-bottom: 20px;
+
+  .hint {
+    text-align: center;
+  }
+
+  p {
+    color: #555;
+    margin-bottom: 3px;
+  }
+
+  span {
+    color: rgb(255, 140, 46);
+  }
+}
+
 main {
   display: flex;
   flex-direction: column;
@@ -9,7 +26,7 @@ main {
 
   button {
     padding: 5px;
-    background-color: red;
+    background-color: #fff;
   }
 }
 
