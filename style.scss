@@ -1,0 +1,22 @@
+main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.buttons {
+  margin-top: 15px;
+
+  button {
+    padding: 5px;
+    background-color: red;
+  }
+}
+
+.videoContainer {
+  height: 500px;
+
+  video {
+    height: 100%;
+  }
+}
