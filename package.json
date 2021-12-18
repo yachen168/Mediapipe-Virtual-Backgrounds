@@ -19,7 +19,11 @@
   },
   "homepage": "https://github.com/yachen168/Mediapipe-Selfie-Segmentation#readme",
   "dependencies": {
-    "sass": "^1.45.0"
+    "sass": "^1.45.0",
+    "@mediapipe/camera_utils": "^0.3.1632432234",
+    "@mediapipe/control_utils": "^0.6.1629159505",
+    "@mediapipe/drawing_utils": "^0.3.1620248257",
+    "@mediapipe/selfie_segmentation": "^0.1.1632777926"
   },
   "devDependencies": {
     "clean-webpack-plugin": "^4.0.0",
