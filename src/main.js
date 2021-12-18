@@ -4,6 +4,7 @@ import "./style.scss";
 let globalController = null;
 let timestamp = null;
 let stream = null;
+
 const canvasElement = new OffscreenCanvas(640, 480);
 const canvasCtx = canvasElement.getContext("2d");
 const selfieSegmentation = new SelfieSegmentation({
@@ -11,37 +12,6 @@ const selfieSegmentation = new SelfieSegmentation({
     return `https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/${file}`;
   },
 });
-
-function onResults(results) {
-  canvasCtx.save();
-  canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
-  canvasCtx.drawImage(
-    results.segmentationMask,
-    0,
-    0,
-    canvasElement.width,
-    canvasElement.height
-  );
-
-  canvasCtx.globalCompositeOperation = "source-out";
-  canvasCtx.fillStyle = "#50B5FF";
-  canvasCtx.fillRect(0, 0, canvasElement.width, canvasElement.height);
-
-  // Only overwrite missing pixels.
-  canvasCtx.globalCompositeOperation = "destination-atop";
-  canvasCtx.drawImage(
-    results.image,
-    0,
-    0,
-    canvasElement.width,
-    canvasElement.height
-  );
-
-  canvasCtx.restore();
-  globalController.enqueue(
-    new VideoFrame(canvasElement, { timestamp, alpha: "discard" })
-  );
-}
 
 selfieSegmentation.setOptions({
   modelSelection: 1,
@@ -60,6 +30,7 @@ bindEventListeners();
 function bindEventListeners() {
   $turnCameraOnButton.addEventListener("click", turnOnCamera);
   $removeBackgroundButton.addEventListener("click", setVirtualBackground);
+  $turnCameraOffButton.addEventListener("click", turnOffCamera);
 }
 
 async function turnOnCamera() {
@@ -69,8 +40,6 @@ async function turnOnCamera() {
     });
 
     $localVideo.srcObject = stream;
-
-    $turnCameraOffButton.addEventListener("click", turnOffCamera(stream));
   } catch (error) {
     if (
       error.name === "NotAllowedError" ||
@@ -83,8 +52,8 @@ async function turnOnCamera() {
   }
 }
 
-function turnOffCamera(stream) {
-  return () => stream.getVideoTracks().map((track) => track.stop());
+function turnOffCamera() {
+  stream.getVideoTracks().map((track) => track.stop());
 }
 
 async function setVirtualBackground() {
@@ -117,4 +86,35 @@ async function transformGetUserMediaStream() {
 
   const transformedStream = new MediaStream([trackGenerator]);
   return transformedStream;
+}
+
+function onResults(results) {
+  canvasCtx.save();
+  canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+  canvasCtx.drawImage(
+    results.segmentationMask,
+    0,
+    0,
+    canvasElement.width,
+    canvasElement.height
+  );
+
+  canvasCtx.globalCompositeOperation = "source-out";
+  canvasCtx.fillStyle = "#50B5FF";
+  canvasCtx.fillRect(0, 0, canvasElement.width, canvasElement.height);
+
+  // Only overwrite missing pixels.
+  canvasCtx.globalCompositeOperation = "destination-atop";
+  canvasCtx.drawImage(
+    results.image,
+    0,
+    0,
+    canvasElement.width,
+    canvasElement.height
+  );
+
+  canvasCtx.restore();
+  globalController.enqueue(
+    new VideoFrame(canvasElement, { timestamp, alpha: "discard" })
+  );
 }
