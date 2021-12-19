@@ -1,9 +1,11 @@
 import { SelfieSegmentation } from "../node_modules/@mediapipe/selfie_segmentation";
+import imageList from "./imageList";
 import "./style.scss";
 
 let globalController = null;
 let timestamp = null;
 let stream = null;
+let customBackgroundImage = new Image();
 
 const canvasElement = new OffscreenCanvas(640, 480);
 const canvasCtx = canvasElement.getContext("2d");
@@ -24,13 +26,38 @@ const $turnCameraOffButton = document.querySelector(".turnCameraOffButton");
 const $removeBackgroundButton = document.querySelector(
   ".removeBackgroundButton"
 );
+const $sectionCustomImages = document.querySelector(".sectionCustomImages");
 
-bindEventListeners();
+init();
+
+function init() {
+  $sectionCustomImages.innerHTML = renderImageItem(imageList);
+  bindEventListeners();
+}
 
 function bindEventListeners() {
   $turnCameraOnButton.addEventListener("click", turnOnCamera);
   $removeBackgroundButton.addEventListener("click", setVirtualBackground);
   $turnCameraOffButton.addEventListener("click", turnOffCamera);
+  const [...$customImages] =
+    $sectionCustomImages.querySelectorAll(".customImage");
+  $customImages.map((item, index) =>
+    item.addEventListener("click", changeBackground(imageList[index].url))
+  );
+}
+
+function renderImageItem(imageList) {
+  return imageList.reduce(
+    (acc, curr) =>
+      acc +
+      `<div class="customImage">
+        <img
+          src="${curr.url}"
+          alt="${curr.alt}"
+        />
+      </div>`,
+    ""
+  );
 }
 
 async function turnOnCamera() {
@@ -61,10 +88,24 @@ async function setVirtualBackground() {
   $localVideo.srcObject = transformedStream;
 }
 
+function changeBackground(imageUrl) {
+  return () => {
+    customBackgroundImage.src = imageUrl;
+    canvasCtx.drawImage(
+      customBackgroundImage,
+      0,
+      0,
+      canvasElement.width,
+      canvasElement.height
+    );
+  };
+}
+
 async function transformGetUserMediaStream() {
   const videoTrack = stream.getVideoTracks()[0];
   const trackProcessor = new MediaStreamTrackProcessor({ track: videoTrack });
   const trackGenerator = new MediaStreamTrackGenerator({ kind: "video" });
+  customBackgroundImage.src = imageList[0].url;
 
   const transformer = new TransformStream({
     async transform(videoFrame, controller) {
@@ -74,7 +115,6 @@ async function transformGetUserMediaStream() {
       videoFrame.height = 480;
       await selfieSegmentation.send({ image: videoFrame });
 
-      // would be good to have results as a response to async .send, instead a callback
       videoFrame.close();
       console.log("transform");
     },
@@ -100,8 +140,13 @@ function onResults(results) {
   );
 
   canvasCtx.globalCompositeOperation = "source-out";
-  canvasCtx.fillStyle = "#50B5FF";
-  canvasCtx.fillRect(0, 0, canvasElement.width, canvasElement.height);
+  canvasCtx.drawImage(
+    customBackgroundImage,
+    0,
+    0,
+    canvasElement.width,
+    canvasElement.height
+  );
 
   // Only overwrite missing pixels.
   canvasCtx.globalCompositeOperation = "destination-atop";

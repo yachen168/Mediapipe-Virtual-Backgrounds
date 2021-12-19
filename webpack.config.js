@@ -25,7 +25,7 @@ module.exports = {
         use: [MiniCssExtractPlugin.loader, "css-loader", "sass-loader"],
       },
       {
-        test: /\.(png|svg|jpg|gif)$/,
+        test: /\.(png|svg|jpg|jpeg|webp|gif)$/,
         type: "asset/resource",
         generator: {
           filename: "images/[hash:8][ext]",
