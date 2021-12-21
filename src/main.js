@@ -7,8 +7,8 @@ let timestamp = null;
 let stream = null;
 let customBackgroundImage = new Image();
 
-const canvasElement = new OffscreenCanvas(640, 480);
-const canvasCtx = canvasElement.getContext("2d");
+let canvasElement = null;
+let canvasCtx = null;
 const selfieSegmentation = new SelfieSegmentation({
   locateFile: (file) => {
     return `https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/${file}`;
@@ -106,13 +106,17 @@ async function transformGetUserMediaStream() {
   const trackProcessor = new MediaStreamTrackProcessor({ track: videoTrack });
   const trackGenerator = new MediaStreamTrackGenerator({ kind: "video" });
   customBackgroundImage.src = imageList[0].url;
+  const { width, height } = videoTrack.getSettings();
+
+  canvasElement = new OffscreenCanvas(width, height);
+  canvasCtx = canvasElement.getContext("2d");
 
   const transformer = new TransformStream({
     async transform(videoFrame, controller) {
       globalController = controller;
       timestamp = videoFrame.timestamp;
-      videoFrame.width = 640;
-      videoFrame.height = 480;
+      videoFrame.width = width;
+      videoFrame.height = height;
       await selfieSegmentation.send({ image: videoFrame });
 
       videoFrame.close();
