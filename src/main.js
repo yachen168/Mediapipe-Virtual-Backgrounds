@@ -27,6 +27,7 @@ const $removeBackgroundButton = document.querySelector(
   ".removeBackgroundButton"
 );
 const $sectionCustomImages = document.querySelector(".sectionCustomImages");
+const $uploadInput = document.querySelector(".uploadInput");
 
 init();
 
@@ -44,6 +45,8 @@ function bindEventListeners() {
   $customImages.map((item, index) =>
     item.addEventListener("click", changeBackground(imageList[index].url))
   );
+
+  $uploadInput.addEventListener("change", onChangeBackgroundImage);
 }
 
 function renderImageItem(imageList) {
@@ -81,11 +84,13 @@ async function turnOnCamera() {
 
 function turnOffCamera() {
   stream.getVideoTracks().map((track) => track.stop());
+  $uploadInput.disabled = true;
 }
 
 async function setVirtualBackground() {
   const transformedStream = await transformGetUserMediaStream();
   $localVideo.srcObject = transformedStream;
+  $uploadInput.disabled = false;
 }
 
 function changeBackground(imageUrl) {
@@ -166,4 +171,12 @@ function onResults(results) {
   globalController.enqueue(
     new VideoFrame(canvasElement, { timestamp, alpha: "discard" })
   );
+}
+
+function onChangeBackgroundImage(e) {
+  const reader = new FileReader();
+  reader.readAsDataURL(e.target.files[0]);
+  reader.onload = () => {
+    changeBackground(reader.result)();
+  };
 }
