@@ -1,4 +1,4 @@
-import { SelfieSegmentation } from '../node_modules/@mediapipe/selfie_segmentation';
+import { SelfieSegmentation } from '@mediapipe/selfie_segmentation';
 import imageList from './imageList';
 import './style.scss';
 
